@@ -71,19 +71,19 @@ if %errorlevel% neq 0 (
 :: Check GPU availability and set CPU mode if needed
 echo %BLUE%[INFO]%NC% Checking GPU availability...
 :: FORCING CPU MODE FOR COMFYUI
-set "DREAMLAYER_COMFYUI_CPU_MODE=true"
-set "DEVICE_MODE=CPU"
+:: set "DREAMLAYER_COMFYUI_CPU_MODE=true"
+:: set "DEVICE_MODE=CPU"
 :: Original logic commented out:
-:: nvidia-smi >nul 2>&1
-:: if %errorlevel% neq 0 (
-::     echo %YELLOW%[INFO]%NC% No NVIDIA GPU detected - ComfyUI will run in CPU mode
-::     set "COMFYUI_CPU_MODE=--cpu"
-::     set "DEVICE_MODE=CPU"
-:: ) else (
-::     echo %GREEN%[INFO]%NC% NVIDIA GPU detected - ComfyUI will use GPU acceleration
-::     set "COMFYUI_CPU_MODE="
-::     set "DEVICE_MODE=GPU"
-:: )
+nvidia-smi >nul 2>&1
+if %errorlevel% neq 0 (
+    echo %YELLOW%[INFO]%NC% No NVIDIA GPU detected - ComfyUI will run in CPU mode
+    set "COMFYUI_CPU_MODE=--cpu"
+    set "DEVICE_MODE=CPU"
+) else (
+    echo %GREEN%[INFO]%NC% NVIDIA GPU detected - ComfyUI will use GPU acceleration
+    set "COMFYUI_CPU_MODE="
+    set "DEVICE_MODE=GPU"
+)
 
 :: Check if backend dependencies are installed
 python -c "import flask" >nul 2>&1
