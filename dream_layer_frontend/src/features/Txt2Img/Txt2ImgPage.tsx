@@ -12,7 +12,7 @@ import CheckpointBrowser from '@/components/checkpoint/CheckpointBrowser';
 import LoraBrowser from '@/components/lora/LoraBrowser';
 import CustomWorkflowBrowser from '@/components/custom-workflow/CustomWorkflowBrowser';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Copy } from "lucide-react";
+import { Copy, Undo2, Redo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTxt2ImgGalleryStore } from '@/stores/useTxt2ImgGalleryStore';
@@ -21,6 +21,7 @@ import useControlNetStore from '@/stores/useControlNetStore';
 import { ControlNetRequest } from '@/types/controlnet';
 import useLoraStore from '@/stores/useLoraStore';
 import { LoraRequest } from '@/types/lora';
+import { useHistoryReducer } from '@/hooks/useHistoryReducer';
 
 interface Txt2ImgPageProps {
   selectedModel: string;
@@ -29,7 +30,15 @@ interface Txt2ImgPageProps {
 
 const Txt2ImgPage: React.FC<Txt2ImgPageProps> = ({ selectedModel, onTabChange }) => {
   const [activeSubTab, setActiveSubTab] = useState("generation");
-  const [coreSettings, setCoreSettings] = useState<Txt2ImgCoreSettings>({
+  const {
+    state: coreSettings,
+    set: setCoreSettings,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    isSettingRef
+  } = useHistoryReducer<Txt2ImgCoreSettings>({
     ...defaultTxt2ImgSettings,
     model_name: selectedModel
   });
@@ -324,15 +333,37 @@ const Txt2ImgPage: React.FC<Txt2ImgPageProps> = ({ selectedModel, onTabChange })
           <>
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-bold text-[#2563EB]">1. Prompt Input</h4>
-              <Button 
-                onClick={handleCopyPrompts}
-                variant="outline"
-                size="sm"
-                className="text-xs px-2 py-1 h-auto flex items-center gap-1"
-              >
-                <Copy className="h-3.5 w-3.5" />
-                Copy Prompts
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={undo}
+                  variant="outline"
+                  size="sm"
+                  disabled={!canUndo}
+                  className="text-xs px-2 py-1 h-auto flex items-center gap-1"
+                  title="Undo (Ctrl+Z)"
+                >
+                  <Undo2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button 
+                  onClick={redo}
+                  variant="outline"
+                  size="sm"
+                  disabled={!canRedo}
+                  className="text-xs px-2 py-1 h-auto flex items-center gap-1"
+                  title="Redo (Ctrl+Y)"
+                >
+                  <Redo2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button 
+                  onClick={handleCopyPrompts}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs px-2 py-1 h-auto flex items-center gap-1"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  Copy Prompts
+                </Button>
+              </div>
             </div>
             <PromptInput 
               label="a) Prompt"
@@ -357,6 +388,10 @@ const Txt2ImgPage: React.FC<Txt2ImgPageProps> = ({ selectedModel, onTabChange })
               steps={coreSettings.steps}
               cfg={coreSettings.cfg_scale}
               onChange={handleSamplingSettingsChange}
+              onUndo={undo}
+              onRedo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
             />
             
             <h4 className="mb-2 mt-6 text-sm font-bold text-[#2563EB]">3. Sizing</h4>
@@ -364,6 +399,10 @@ const Txt2ImgPage: React.FC<Txt2ImgPageProps> = ({ selectedModel, onTabChange })
               width={coreSettings.width}
               height={coreSettings.height}
               onChange={handleSizeSettingsChange}
+              onUndo={undo}
+              onRedo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
             />
             
             <h4 className="mb-2 mt-6 text-sm font-bold text-[#2563EB]">
@@ -373,6 +412,10 @@ const Txt2ImgPage: React.FC<Txt2ImgPageProps> = ({ selectedModel, onTabChange })
               batchCount={coreSettings.batch_count}
               batchSize={coreSettings.batch_size}
               onChange={handleBatchSettingsChange}
+              onUndo={undo}
+              onRedo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
             />
             
             <div className="flex items-center justify-between mt-6 mb-2">
@@ -396,6 +439,10 @@ const Txt2ImgPage: React.FC<Txt2ImgPageProps> = ({ selectedModel, onTabChange })
               seed={coreSettings.seed}
               random={coreSettings.random_seed}
               onChange={handleSeedChange}
+              onUndo={undo}
+              onRedo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
             />
           </>
         );

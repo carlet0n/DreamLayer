@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Undo2, Redo2 } from "lucide-react";
 import Slider from "./Slider";
 import {
   Select,
@@ -28,6 +30,10 @@ interface RenderSettingsProps {
   steps: number;
   cfg: number;
   onChange: (sampler: string, scheduler: string, steps: number, cfg: number) => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
 
 const renderStyles: RenderStyleOption[] = [
@@ -229,7 +235,11 @@ const RenderSettings: React.FC<RenderSettingsProps> = ({
   scheduler,
   steps,
   cfg,
-  onChange
+  onChange,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
 }) => {
   const [selectedStyle, setSelectedStyle] = useState<RenderStyleOption>(
     renderStyles.find(style => style.id === sampler) || renderStyles[0]
@@ -264,9 +274,35 @@ const RenderSettings: React.FC<RenderSettingsProps> = ({
   return (
     <div className="space-y-4">
       {/* Sampling Settings Header */}
-      <h4 className="mb-2 mt-6 text-sm font-bold text-[#2563EB]">
-        {showResizeMode ? "2. Sampling Settings" : "2. Sampling Settings"}
-      </h4>
+      <div className="flex items-center justify-between mb-2 mt-6">
+        <h4 className="text-sm font-bold text-[#2563EB]">
+          {showResizeMode ? "2. Sampling Settings" : "2. Sampling Settings"}
+        </h4>
+        {(onUndo || onRedo) && (
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={onUndo}
+              variant="outline"
+              size="sm"
+              disabled={!canUndo}
+              className="text-xs px-2 py-1 h-auto flex items-center gap-1"
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button 
+              onClick={onRedo}
+              variant="outline"
+              size="sm"
+              disabled={!canRedo}
+              className="text-xs px-2 py-1 h-auto flex items-center gap-1"
+              title="Redo (Ctrl+Y)"
+            >
+              <Redo2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Sampling Method Section */}
       <div className="mb-4">
@@ -292,7 +328,7 @@ const RenderSettings: React.FC<RenderSettingsProps> = ({
         <Slider
           min={1}
           max={150}
-          defaultValue={steps}
+          value={steps}
           label={getStepsLabel()}
           sublabel=""
           onChange={handleStepsChange}
@@ -303,7 +339,7 @@ const RenderSettings: React.FC<RenderSettingsProps> = ({
         <Slider
           min={1}
           max={30}
-          defaultValue={cfg}
+          value={cfg}
           label={getCfgLabel()}
           sublabel=""
           onChange={handleCfgChange}
