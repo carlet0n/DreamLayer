@@ -2,26 +2,18 @@ import React, { useState } from "react";
 import Slider from "./Slider";
 import { Button } from "./ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
-import { ChevronDown, Undo2, Redo2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface GenerationIDProps {
   seed: number;
   random: boolean;
   onChange: (seed: number, random?: boolean) => void;
-  onUndo?: () => void;
-  onRedo?: () => void;
-  canUndo?: boolean;
-  canRedo?: boolean;
 }
 
 const GenerationID: React.FC<GenerationIDProps> = ({
   seed,
   random,
   onChange,
-  onUndo,
-  onRedo,
-  canUndo = false,
-  canRedo = false,
 }) => {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [widthValue, setWidthValue] = useState(2500);
@@ -34,32 +26,6 @@ const GenerationID: React.FC<GenerationIDProps> = ({
 
   return (
     <div className="space-y-2">
-      {(onUndo || onRedo) && (
-        <div className="flex justify-end">
-          <div className="flex items-center gap-2">
-            <Button 
-              onClick={onUndo}
-              variant="outline"
-              size="sm"
-              disabled={!canUndo}
-              className="text-xs px-2 py-1 h-auto flex items-center gap-1"
-              title="Undo (Ctrl+Z)"
-            >
-              <Undo2 className="h-3.5 w-3.5" />
-            </Button>
-            <Button 
-              onClick={onRedo}
-              variant="outline"
-              size="sm"
-              disabled={!canRedo}
-              className="text-xs px-2 py-1 h-auto flex items-center gap-1"
-              title="Redo (Ctrl+Y)"
-            >
-              <Redo2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-      )}
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium">Generation Seed</label>
         <div className="flex items-center space-x-2">
